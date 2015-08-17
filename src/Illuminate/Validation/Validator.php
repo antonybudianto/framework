@@ -208,6 +208,26 @@ class Validator implements ValidatorContract
      */
     protected function explodeRules($rules)
     {
+        $indexes = [];
+        foreach ($rules as $key => $rule) {
+            $index = 0;
+            if (strpos($key, '[]') !== false) {
+                $data_key = str_replace('[]', '', $key);
+                if (array_key_exists($data_key, $this->data)) {
+                    array_push($indexes, $index);
+                    $array_size = sizeof($this->data[$data_key]);
+                    for ($i = 0 ; $i < $array_size; $i++) {
+                        $rules[$data_key.'.'.$i] = $rule;
+                    }
+                }
+            }
+            $index++;
+        }
+        
+        for ($i = 0 ; $i < sizeof($indexes) ; $i++) {
+            array_splice($rules, $indexes[$i], 1);
+        }
+        
         foreach ($rules as $key => &$rule) {
             $rule = (is_string($rule)) ? explode('|', $rule) : $rule;
         }
